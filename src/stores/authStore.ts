@@ -37,13 +37,13 @@ export class AuthStore {
 
     logout() {
         this.removeTokens();
-        this.deleteTokensFromLocalStorage();
+        AuthStore.deleteTokensFromLocalStorage();
         (async () => {
             await this.rootStore.userStore.updateCurrentUserInfo()
         })();
     }
 
-    private deleteTokensFromLocalStorage() {
+    private static deleteTokensFromLocalStorage() {
         if (typeof window !== 'undefined') {
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
