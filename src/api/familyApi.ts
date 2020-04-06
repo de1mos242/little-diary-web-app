@@ -1,26 +1,29 @@
 import {AppConfig} from "../appConfig";
 import {assertOkResponse} from "../utils/http";
-import {Family} from "../models/family";
 import {FamilyDto, FamilyShortDto} from "../dtos/family";
+import fetch from 'isomorphic-unfetch';
+import retryFetch from "fetch-retry";
 
+const rFetch = retryFetch(fetch);
 
 export class FamilyApi {
     private readonly serverUrl: string = AppConfig.familyServiceUrl || "";
 
-    async saveFamily(family: Family, token: string) {
-        const response = await fetch(`${this.serverUrl}/v1/family/${family.uuid}`, {
+
+    async saveFamily(familyUuid: string, familyTitle: string, token: string) {
+        const response = await rFetch(`${this.serverUrl}/v1/family/${familyUuid}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({title: family.title})
+            body: JSON.stringify({title: familyTitle})
         });
         await assertOkResponse(response);
     }
 
     async getFamilies(token: string): Promise<FamilyShortDto[]> {
-        const response = await fetch(`${this.serverUrl}/v1/family`, {
+        const response = await rFetch(`${this.serverUrl}/v1/family`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -37,7 +40,7 @@ export class FamilyApi {
     }
 
     async getFamily(uuid: string, token: string): Promise<FamilyDto> {
-        const response = await fetch(`${this.serverUrl}/v1/family/${uuid}`, {
+        const response = await rFetch(`${this.serverUrl}/v1/family/${uuid}`, {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -46,5 +49,15 @@ export class FamilyApi {
         await assertOkResponse(response);
 
         return await response.json();
+    }
+
+    async deleteFamily(uuid: string, token: string) {
+        const response = await rFetch(`${this.serverUrl}/v1/family/${uuid}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+        });
+        await assertOkResponse(response);
     }
 }

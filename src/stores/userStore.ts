@@ -21,16 +21,15 @@ export class UserStore {
 
     async updateCurrentUserInfo() {
         this.rootStore.uiStore.showLoading();
-        const accessToken = await this.rootStore.authStore.getAccessToken();
-        if (accessToken == null) {
-            this.updateCurrentUser(null);
-            this.rootStore.uiStore.hideLoading();
-            return
-        }
-        const userUuid = getUserFromAccessToken(accessToken);
         try {
-            const json = await this.authApi.getUserInfo(userUuid, accessToken);
-            this.updateCurrentUser(json);
+            const accessToken = await this.rootStore.authStore.getAccessToken();
+            if (accessToken == null) {
+                this.updateCurrentUser(null);
+            } else {
+                const userUuid = getUserFromAccessToken(accessToken);
+                const json = await this.authApi.getUserInfo(userUuid, accessToken);
+                this.updateCurrentUser(json);
+            }
         } catch (err) {
             this.rootStore.uiStore.catchError(err);
         } finally {
@@ -50,12 +49,11 @@ export class UserStore {
     async fetchPublicUsers(userUuids: string[]) {
         let users: User[] = [];
         this.rootStore.uiStore.showLoading();
-        const accessToken = await this.rootStore.authStore.getAccessToken();
-        if (accessToken == null) {
-            this.rootStore.uiStore.hideLoading();
-            throw new Error("Unauthorized");
-        }
         try {
+            const accessToken = await this.rootStore.authStore.getAccessToken();
+            if (accessToken == null) {
+                throw new Error("Unauthorized");
+            }
             const json = await this.authApi.getPublicUsers(userUuids, accessToken);
             users = json.map(j => User.fromObj(j));
         } catch (err) {

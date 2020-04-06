@@ -44,4 +44,44 @@ export class FamilyStore {
             this.rootStore.uiStore.hideLoading()
         }
     }
+
+    async saveFamily(newFamilyTitle: string) {
+        if (this.family == null) {
+            return
+        }
+        this.rootStore.uiStore.showLoading();
+
+        try {
+            const accessToken = await this.rootStore.authStore.getAccessToken();
+            if (accessToken == null) {
+                throw new Error("Unauthorized");
+            }
+            await this.familyApi.saveFamily(this.family.uuid, newFamilyTitle, accessToken);
+            await this.fetchFamilyInfo(this.family.uuid);
+        } catch (err) {
+            this.rootStore.uiStore.catchError(err);
+        } finally {
+            this.rootStore.uiStore.hideLoading()
+        }
+    }
+
+    async deleteFamily() {
+        if (this.family == null) {
+            return
+        }
+
+        this.rootStore.uiStore.showLoading();
+
+        try {
+            const accessToken = await this.rootStore.authStore.getAccessToken();
+            if (accessToken == null) {
+                throw new Error("Unauthorized");
+            }
+            await this.familyApi.deleteFamily(this.family.uuid, accessToken);
+        } catch (err) {
+            this.rootStore.uiStore.catchError(err);
+        } finally {
+            this.rootStore.uiStore.hideLoading()
+        }
+    }
 }

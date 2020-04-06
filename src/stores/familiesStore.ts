@@ -1,22 +1,23 @@
 import {RootStore} from "./rootStore";
 import {FamilyApi} from "../api/familyApi";
 import {Family} from "../models/family";
-import {action, computed, decorate, observable} from "mobx";
+import {action, computed, observable} from "mobx";
 import {FamilyShortDto} from "../dtos/family";
+import {v4 as uuidv4} from 'uuid';
 
 
 class FamiliesStore {
     private rootStore: RootStore;
     private familyApi: FamilyApi;
 
-    families: Family[] = [];
+    @observable families: Family[] = [];
 
     constructor(rootStore: RootStore, familyApi: FamilyApi) {
         this.rootStore = rootStore;
         this.familyApi = familyApi;
     }
 
-    get hasFamilies() {
+    @computed get hasFamilies() {
         return this.families != null && this.families.length > 0;
     }
 
@@ -37,16 +38,30 @@ class FamiliesStore {
         }
     }
 
-    updateFamilies(json: FamilyShortDto[]) {
+    @action.bound updateFamilies(json: FamilyShortDto[]) {
         this.families = json.map(j => Family.fromJson(j));
-        // json.forEach(j => this.families.push(Family.fromJson(j)));
+    }
+
+    async addNewFamily(title: string) {
+        return this.saveFamily(uuidv4(), title);
+    }
+
+    async saveFamily(uuid: string, title: string) {
+        this.rootStore.uiStore.showLoading();
+
+        try {
+            const accessToken = await this.rootStore.authStore.getAccessToken();
+            if (accessToken == null) {
+                throw new Error("Unauthorized");
+            }
+            await this.familyApi.saveFamily(uuid, title, accessToken);
+            await this.fetchFamilies();
+        } catch (err) {
+            this.rootStore.uiStore.catchError(err);
+        } finally {
+            this.rootStore.uiStore.hideLoading()
+        }
     }
 }
-
-decorate(FamiliesStore, {
-    families: observable,
-    hasFamilies: computed,
-    updateFamilies: action.bound,
-});
 
 export {FamiliesStore}

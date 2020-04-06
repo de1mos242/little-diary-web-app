@@ -22,7 +22,7 @@ const LoginPage = observer(() => {
                 Log-in to your account
             </Header>
             <Form size="large">
-                <Segment stacked>
+                <Segment>
                     <Form.Input fluid icon="user" iconPosition="left" placeholder="admin"
                                 value={username} onChange={(e) => setUsername(e.target.value)}/>
                     <Form.Input fluid icon="lock" type="password" iconPosition="left" placeholder="poiu"
