@@ -2,6 +2,7 @@ import {RootStore} from "./rootStore";
 import {AuthApi} from "../api/authApi";
 import {getTokenExpiration} from "../utils/jwt";
 import {action, decorate, observable} from "mobx";
+import Router from "next/router";
 
 export class AuthStore {
     private rootStore: RootStore;
@@ -19,27 +20,27 @@ export class AuthStore {
         this.readTokensFromLocalStorage();
     }
 
-    login(username: string, password: string) {
+    async login(username: string, password: string) {
         this.rootStore.uiStore.showLoading();
-        return this.authApi.login(username, password)
-            .then(json => {
-                const {accessToken, refreshToken} = json;
-                this.updateTokens(accessToken, refreshToken);
-                this.putTokensToLocalStorage();
-                (async () => {
-                    await this.rootStore.userStore.updateCurrentUserInfo()
-                })();
-            }).catch((err) => {
-                this.rootStore.uiStore.showError(err)
-            })
-            .finally(() => this.rootStore.uiStore.hideLoading());
+        try {
+            const json = await this.authApi.login(username, password);
+            const {accessToken, refreshToken} = json;
+            this.updateTokens(accessToken, refreshToken);
+            this.putTokensToLocalStorage();
+            await this.rootStore.userStore.updateCurrentUserInfo();
+        } catch (err) {
+            this.rootStore.uiStore.catchError(err)
+        } finally {
+            this.rootStore.uiStore.hideLoading()
+        }
     }
 
     logout() {
         this.removeTokens();
         AuthStore.deleteTokensFromLocalStorage();
         (async () => {
-            await this.rootStore.userStore.updateCurrentUserInfo()
+            await this.rootStore.userStore.updateCurrentUserInfo();
+            await Router.push("/");
         })();
     }
 
@@ -114,8 +115,8 @@ export class AuthStore {
     }
 }
 
-decorate(AuthStore.prototype, {
+decorate(AuthStore, {
     accessToken: observable,
     refreshToken: observable,
-    updateTokens: action,
+    updateTokens: action.bound,
 });

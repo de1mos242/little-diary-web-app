@@ -1,49 +1,45 @@
 import {RootStore} from "./rootStore";
-import {action, computed, decorate, observable} from "mobx";
+import {action, computed, observable} from "mobx";
+import Router from "next/router";
 
 export class UiStore {
     private rootStore: RootStore;
 
-    loadingsCount = 0;
-    errorMessage = "";
+    @observable loadingsCount = 0;
+    @observable errorMessage = "";
 
     constructor(rootStore: RootStore) {
         this.rootStore = rootStore;
     }
 
-    get isLoading() {
-        return this.loadingsCount == 0;
+    @computed get isLoading() {
+        return this.loadingsCount > 0;
     }
 
-    get hasErrorMessage() {
+    @computed get hasErrorMessage() {
         return this.errorMessage != null && this.errorMessage.length > 0;
     }
 
-    showLoading() {
-        this.loadingsCount++;
+    @action.bound showLoading() {
+        this.loadingsCount += 1;
     }
 
-    hideLoading() {
-        this.loadingsCount--;
+    @action.bound hideLoading() {
+        this.loadingsCount -= 1;
     }
 
-    showError(err: any) {
+    @action.bound catchError(err: Error) {
+        if (typeof window !== 'undefined') {
+            if (err.message == "Unauthorized") {
+                Router.push("/login");
+                return
+            }
+        }
         this.errorMessage = err.toString();
+        console.error(err);
     }
 
-    hideError() {
+    @action.bound hideError() {
         this.errorMessage = "";
     }
 }
-
-decorate(UiStore.prototype, {
-    loadingsCount: observable,
-    errorMessage: observable,
-    isLoading: computed,
-    hasErrorMessage: computed,
-    showLoading: action,
-    hideLoading: action,
-    showError: action,
-    hideError: action,
-
-});

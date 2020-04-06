@@ -1,5 +1,5 @@
 import {observer} from "mobx-react";
-import {Button, Container as UiContainer, Form, Header, Input} from "semantic-ui-react";
+import {Button, Form, Grid, Header, Segment} from "semantic-ui-react";
 import React, {useContext, useState} from "react";
 import {WebAppContext} from "../webAppContext";
 import Router from "next/router";
@@ -16,23 +16,21 @@ const LoginPage = observer(() => {
         Router.push("/");
         return null;
     }
-    return <div>
-        <Header as='h3' textAlign='center' content='Container'/>
-        <UiContainer>
-            <Form>
-                <Form.Field>
-                    <label>Username</label>
-                    <Input placeholder="admin" value={username}
-                           onChange={(e) => setUsername(e.target.value)}/>
-                </Form.Field>
-                <Form.Field>
-                    <label>Password</label>
-                    <Input placeholder="poiu" value={password}
-                           onChange={(e) => setPassword(e.target.value)}/>
-                </Form.Field>
-                <Button type="submit" onClick={makeLogin}>Login</Button>
+    return <Grid textAlign="center" style={{height: '100vh'}} verticalAlign="middle">
+        <Grid.Column style={{maxWidth: 450}}>
+            <Header as='h2' textAlign='center'>
+                Log-in to your account
+            </Header>
+            <Form size="large">
+                <Segment>
+                    <Form.Input fluid icon="user" iconPosition="left" placeholder="admin"
+                                value={username} onChange={(e) => setUsername(e.target.value)}/>
+                    <Form.Input fluid icon="lock" type="password" iconPosition="left" placeholder="poiu"
+                                value={password} onChange={(e) => setPassword(e.target.value)}/>
+                    <Button type="submit" fluid size="large" onClick={makeLogin}>Login</Button>
+                </Segment>
             </Form>
-        </UiContainer>
-    </div>
+        </Grid.Column>
+    </Grid>
 });
 export default LoginPage
