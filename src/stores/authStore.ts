@@ -2,6 +2,7 @@ import {RootStore} from "./rootStore";
 import {AuthApi} from "../api/authApi";
 import {getTokenExpiration} from "../utils/jwt";
 import {action, decorate, observable} from "mobx";
+import Router from "next/router";
 
 export class AuthStore {
     private rootStore: RootStore;
@@ -30,7 +31,7 @@ export class AuthStore {
                     await this.rootStore.userStore.updateCurrentUserInfo()
                 })();
             }).catch((err) => {
-                this.rootStore.uiStore.showError(err)
+                this.rootStore.uiStore.catchError(err)
             })
             .finally(() => this.rootStore.uiStore.hideLoading());
     }
@@ -39,7 +40,8 @@ export class AuthStore {
         this.removeTokens();
         AuthStore.deleteTokensFromLocalStorage();
         (async () => {
-            await this.rootStore.userStore.updateCurrentUserInfo()
+            await this.rootStore.userStore.updateCurrentUserInfo();
+            await Router.push("/");
         })();
     }
 
@@ -114,8 +116,8 @@ export class AuthStore {
     }
 }
 
-decorate(AuthStore.prototype, {
+decorate(AuthStore, {
     accessToken: observable,
     refreshToken: observable,
-    updateTokens: action,
+    updateTokens: action.bound,
 });

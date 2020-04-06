@@ -1,16 +1,22 @@
-import {AppProps} from 'next/app'
+import App from 'next/app'
 import React from "react";
-import {rootStore, WebAppContext} from "../webAppContext";
+import {WebAppContext} from "../webAppContext";
 import 'semantic-ui-css/semantic.min.css'
 import HeaderMenu from "../components/headerMenu";
 import {ErrorMessage} from "../components/errorMessage";
+import {getRootStore} from "../stores/rootStore";
 
-function MyApp({Component, pageProps}: AppProps) {
-    return <WebAppContext.Provider value={rootStore}>
-        <HeaderMenu/>
-        <ErrorMessage/>
-        <Component {...pageProps} />
-    </WebAppContext.Provider>
+class MyApp extends App {
+    render(): JSX.Element {
+        const {Component, pageProps} = this.props;
+
+        return <WebAppContext.Provider value={getRootStore()}>
+            <HeaderMenu/>
+            <ErrorMessage/>
+            <Component {...pageProps} />
+
+        </WebAppContext.Provider>
+    }
 }
 
 export default MyApp

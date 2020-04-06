@@ -1,0 +1,1 @@
+export type UserPublicDto = { username: string, uuid: string }

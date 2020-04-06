@@ -1,5 +1,6 @@
 import {RootStore} from "./rootStore";
 import {action, computed, decorate, observable} from "mobx";
+import Router from "next/router";
 
 export class UiStore {
     private rootStore: RootStore;
@@ -27,7 +28,13 @@ export class UiStore {
         this.loadingsCount--;
     }
 
-    showError(err: any) {
+    catchError(err: Error) {
+        if (typeof window !== 'undefined') {
+            if (err.message == "Unauthorized") {
+                Router.push("/login");
+                return
+            }
+        }
         this.errorMessage = err.toString();
     }
 
@@ -36,14 +43,14 @@ export class UiStore {
     }
 }
 
-decorate(UiStore.prototype, {
+decorate(UiStore, {
     loadingsCount: observable,
     errorMessage: observable,
     isLoading: computed,
     hasErrorMessage: computed,
-    showLoading: action,
-    hideLoading: action,
-    showError: action,
-    hideError: action,
+    showLoading: action.bound,
+    hideLoading: action.bound,
+    catchError: action.bound,
+    hideError: action.bound,
 
 });

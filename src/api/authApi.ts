@@ -1,5 +1,6 @@
 import {AppConfig} from "../appConfig";
 import {assertOkResponse} from "../utils/http";
+import {UserPublicDto} from "../dtos/user";
 
 export class AuthApi {
     private readonly serverUrl: string = AppConfig.authServiceUrl || "";
@@ -12,7 +13,7 @@ export class AuthApi {
         });
         await assertOkResponse(response);
         const json = await response.json();
-        
+
         return {
             accessToken: json.access_token,
             refreshToken: json.refresh_token
@@ -41,5 +42,15 @@ export class AuthApi {
             role: user.role,
             uuid: user.uuid
         }
+    }
+
+    async getPublicUsers(userUuids: string[], token: string): Promise<UserPublicDto[]> {
+        const url = new URL(`${this.serverUrl}/api/v1/users/public`);
+        userUuids.forEach(uuid => url.searchParams.append("uuids", uuid));
+        const response = await fetch(url.toString(), {
+            headers: {'Authorization': `Bearer ${token}`}
+        });
+        await assertOkResponse(response);
+        return await response.json();
     }
 }

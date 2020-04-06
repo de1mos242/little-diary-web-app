@@ -13,7 +13,7 @@ export class UserStore {
         this.authApi = authApi;
     }
 
-    currentUser?: User;
+    currentUser: User | null = null;
 
     get isLoggedIn() {
         return this.currentUser != null;
@@ -32,7 +32,7 @@ export class UserStore {
             const json = await this.authApi.getUserInfo(userUuid, accessToken);
             this.updateCurrentUser(json);
         } catch (err) {
-            this.rootStore.uiStore.showError(err);
+            this.rootStore.uiStore.catchError(err);
         } finally {
             this.rootStore.uiStore.hideLoading()
         }
@@ -43,13 +43,32 @@ export class UserStore {
         if (json != null) {
             this.currentUser = User.fromObj(json);
         } else {
-            this.currentUser = undefined;
+            this.currentUser = null;
         }
+    }
+
+    async fetchPublicUsers(userUuids: string[]) {
+        let users: User[] = [];
+        this.rootStore.uiStore.showLoading();
+        const accessToken = await this.rootStore.authStore.getAccessToken();
+        if (accessToken == null) {
+            this.rootStore.uiStore.hideLoading();
+            throw new Error("Unauthorized");
+        }
+        try {
+            const json = await this.authApi.getPublicUsers(userUuids, accessToken);
+            users = json.map(j => User.fromObj(j));
+        } catch (err) {
+            this.rootStore.uiStore.catchError(err);
+        } finally {
+            this.rootStore.uiStore.hideLoading()
+        }
+        return users;
     }
 }
 
-decorate(UserStore.prototype, {
+decorate(UserStore, {
     currentUser: observable,
     isLoggedIn: computed,
-    updateCurrentUser: action,
+    updateCurrentUser: action.bound,
 });
