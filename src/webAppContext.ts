@@ -1,6 +1,7 @@
 import * as React from "react";
-import {RootStore} from "./stores/rootStore";
+import {getRootStore} from "./stores/rootStore";
+import {AppConfig} from "./appConfig";
 
-export const rootStore = new RootStore();
+export const rootStore = getRootStore(new AppConfig());
 
 export const WebAppContext = React.createContext(rootStore);

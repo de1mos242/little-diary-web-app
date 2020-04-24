@@ -3,8 +3,10 @@ import React, {useContext, useEffect, useState} from "react";
 import {WebAppContext} from "../webAppContext";
 import {Breadcrumb, Button, Container, Form, Header, Input, List} from "semantic-ui-react";
 import FamilyListRow from "../components/familyListRow";
+import {NextPage} from "next";
+import {Family} from "../models/family";
 
-export default observer(() => {
+const FamiliesPageView: NextPage = observer(() => {
     const {familiesStore} = useContext(WebAppContext);
     const [newFamilyTitle, setNewFamilyTitle] = useState("");
     const [isNewFamily, setIsNewFamily] = useState(false);
@@ -28,9 +30,9 @@ export default observer(() => {
         </Breadcrumb>
         {familiesStore.hasFamilies ?
             <List divided relaxed>
-                {familiesStore.families.map((f) => <FamilyListRow family={f} key={f.uuid}/>)}
+                {familiesStore.families.map((f: Family) => <FamilyListRow family={f} key={f.uuid}/>)}
             </List> :
-            <Header as="sub">You don't have access to any families yet, try to fill a family</Header>}
+            <Header as="sub">You don&apos;t have access to any families yet, try to fill a family</Header>}
         {isNewFamily ?
             <Form>
                 <Input autoFocus
@@ -40,4 +42,10 @@ export default observer(() => {
             </Form> :
             <Button primary onClick={() => setIsNewFamily(true)}>New family</Button>}
     </Container>
-})
+});
+
+FamiliesPageView.getInitialProps = async () => {
+    return {};
+};
+
+export default FamiliesPageView
