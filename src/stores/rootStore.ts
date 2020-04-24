@@ -6,6 +6,7 @@ import {FamilyApi} from "../api/familyApi";
 import {FamiliesStore} from "./familiesStore";
 import {FamilyStore} from "./familyStore";
 import {decorate, observable} from "mobx";
+import {AppConfig} from "../appConfig";
 
 let clientSideRootStore: RootStore;
 
@@ -15,10 +16,14 @@ export class RootStore {
     authStore: AuthStore;
     familiesStore: FamiliesStore;
     familyStore: FamilyStore;
+    fullyInitialized = false;
 
-    constructor() {
-        let authApi = new AuthApi();
-        let familyApi = new FamilyApi();
+    constructor(appConfig: AppConfig) {
+        if (appConfig.isInitialized) {
+            this.fullyInitialized = true;
+        }
+        let authApi = new AuthApi(appConfig.getAuthServiceUrl());
+        let familyApi = new FamilyApi(appConfig.getFamilyServiceUrl());
         this.userStore = new UserStore(this, authApi);
         this.authStore = new AuthStore(this, authApi);
         this.familiesStore = new FamiliesStore(this, familyApi);
@@ -38,17 +43,12 @@ decorate(RootStore, {
     familyStore: observable,
 });
 
-export function getRootStore(): RootStore {
-    console.log(" run get root store client");
+export function getRootStore(appConfig: AppConfig): RootStore {
     if (typeof window === 'undefined') {
-        console.log("get root store server");
-        return new RootStore();
+        return new RootStore(appConfig);
     }
-    if (clientSideRootStore == null) {
-        console.log("create root store client");
-        clientSideRootStore = new RootStore();
-
+    if (clientSideRootStore == null || !clientSideRootStore.fullyInitialized) {
+        clientSideRootStore = new RootStore(appConfig);
     }
-    console.log("get root store client");
     return clientSideRootStore;
 }

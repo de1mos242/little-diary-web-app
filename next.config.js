@@ -1,7 +1,8 @@
 module.exports = {
-    env: {
-        AUTH_SERVICE_URL: 'http://localhost:41002',
-        FAMILY_SERVICE_URL: 'http://localhost:42002',
-        MEASUREMENT_SERVICE_URL: 'http://localhost:43002',
-    }
-};
+    webpack: (config) => {
+        config.node = {
+            fs: 'empty'
+        }
+        return config
+    },
+}

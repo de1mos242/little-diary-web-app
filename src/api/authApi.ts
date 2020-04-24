@@ -1,13 +1,16 @@
-import {AppConfig} from "../appConfig";
 import {assertOkResponse} from "../utils/http";
-import {UserPublicDto} from "../dtos/user";
 import fetch from 'isomorphic-unfetch';
 import retryFetch from "fetch-retry";
+import {UserPublicDto} from "../dtos/user";
 
 const rFetch = retryFetch(fetch);
 
 export class AuthApi {
-    private readonly serverUrl: string = AppConfig.authServiceUrl || "";
+    private readonly serverUrl: string;
+
+    constructor(authServiceUrl: string) {
+        this.serverUrl = authServiceUrl;
+    }
 
     async login(username: string, password: string) {
         const response = await rFetch(`${this.serverUrl}/auth/login`, {

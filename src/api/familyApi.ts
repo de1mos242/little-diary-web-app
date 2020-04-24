@@ -1,4 +1,3 @@
-import {AppConfig} from "../appConfig";
 import {assertOkResponse} from "../utils/http";
 import {FamilyDto, FamilyShortDto} from "../dtos/family";
 import fetch from 'isomorphic-unfetch';
@@ -7,8 +6,11 @@ import retryFetch from "fetch-retry";
 const rFetch = retryFetch(fetch);
 
 export class FamilyApi {
-    private readonly serverUrl: string = AppConfig.familyServiceUrl || "";
+    private readonly serverUrl: string;
 
+    constructor(familyServiceUrl: string) {
+        this.serverUrl = familyServiceUrl;
+    }
 
     async saveFamily(familyUuid: string, familyTitle: string, token: string) {
         const response = await rFetch(`${this.serverUrl}/v1/family/${familyUuid}`, {
