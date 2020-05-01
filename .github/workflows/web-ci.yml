@@ -1,6 +1,8 @@
 name: Test workflow
 
-on: [push]
+on:
+  push:
+    branches: ['*']
 
 jobs:
   build:
@@ -9,5 +11,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
     - name: Build image
       run: docker build .  # linter will be executed inside build
+    - name: Bump version and push tag
+      uses: anothrNick/github-tag-action@1.17.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
+        WITH_V: true
+        DEFAULT_BUMP: patch
+        RELEASE_BRANCHES: master
